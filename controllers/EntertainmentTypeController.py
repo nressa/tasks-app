@@ -4,11 +4,34 @@ from mysql.connector import Error
 
 class EntertainmentTypeController:
 
-    def __init__(self, name):
-        self.name = name
+    @classmethod
+    def index(cls, keyword:str):
+        try:
+            # Connect to MySQL
+            connection = db_connection()
+
+            if connection.is_connected():
+                cursor = connection.cursor(dictionary=True)
+                query = "SELECT id, name FROM entertainment_types"
+
+                if keyword:
+                    query += " WHERE name LIKE %s OR description LIKE %s"
+                    cursor.execute(query, (f"%{keyword}%", f"%{keyword}%"))
+                else:
+                    cursor.execute(query)
+
+                rows = cursor.fetchall()
+
+                return rows
+
+        except Error as e:
+            print(f"❌ Error while connecting or retrieving data: {e}")
+
+        # Store the entertainment type data
+        return query
 
     @classmethod
-    def store(cls, data):
+    def store(cls, data: dict[str]):
 
         try:
             # Connect to MySQL
@@ -31,4 +54,4 @@ class EntertainmentTypeController:
 
         print(data)
         # Store the entertainment type data
-        return True;
+        return True

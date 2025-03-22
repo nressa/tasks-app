@@ -2,20 +2,43 @@ from controllers.EntertainmentTypeController import EntertainmentTypeController
 from helpers.ValidateText import ValidateText
 
 
-def store_entertainment_type():
-    controller = EntertainmentTypeController
+def menu():
+    validator = ValidateText()
 
-    data = {
-        "name": ValidateText().required_string("Add Name: ", "name"),
-        "description": ValidateText().required_string("Add Description: ", "description")
-    }
+    while True:
+        print("""
+            Choose Feature:
+            1. Create Task
+            2. List Task
+        """)
 
-    response = controller.store(data)
+        task = input("Select Task: ")
 
-    if response is True:
-        store_entertainment_type()
-    else:
-        exit()
+        if task == "1":
+            name = ValidateText().required_string("Add Name: ", "name").title()
+            response = EntertainmentTypeController.store({
+                "name": name,
+                "description": ValidateText().required_string("Add Description: ", "description")
+            })
+
+            print("✅ Task Created: " + name)
+
+        elif task == "2":
+            print("🔍 List Tasks")
+            keyword = input("Search: ")
+            response = EntertainmentTypeController.index(keyword)
+
+            for task in response:
+                print(str(task["id"]) + ". " + task["name"])
+
+        elif task == "exit":
+            print("👋 Exiting...")
+            break
+
+        else:
+            print("❌ Invalid option. Please choose 1, 2, or 'exit'.")
 
 
-store_entertainment_type()
+# Run the menu
+if __name__ == "__main__":
+    menu()
