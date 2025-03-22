@@ -1,9 +1,14 @@
 from controllers.EntertainmentTypeController import EntertainmentTypeController
+from helpers.ValidateText import ValidateText
 
 
 def store_entertainment_type():
     controller = EntertainmentTypeController
-    data = {"name": input("Add Name: "), "description": input("Add Description: ")}
+
+    data = {
+        "name": ValidateText().required_string("Add Name: ", "name"),
+        "description": ValidateText().required_string("Add Description: ", "description")
+    }
 
     response = controller.store(data)
 
