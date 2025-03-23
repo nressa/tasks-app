@@ -53,21 +53,19 @@ class TaskController:
         except Error as e:
             print(f"❌ Error while connecting or storing data: {e}")
 
-        print(data)
-
         return True
 
     @classmethod
-    def show(cls, task_id: int) -> object:
+    def show(cls, task_id: int):
+        task = ""
         try:
+            task = ""
             # Connect to MySQL
             connection = db_connection()
 
             if connection.is_connected():
                 cursor = connection.cursor(dictionary=True)
-                query = "SELECT id, name, status, description FROM tasks WHERE id = %s"
-                cursor.execute(query, (task_id,))
-
+                cursor.execute("SELECT id, name, status, description FROM tasks WHERE id = %s", (task_id,))
                 task = cursor.fetchone()
 
                 return task
@@ -79,8 +77,6 @@ class TaskController:
 
     @classmethod
     def update(cls, task_id: int, data: dict) -> bool:
-        task = ""
-
         try:
             # Connect to MySQL
             connection = db_connection()
@@ -103,5 +99,10 @@ class TaskController:
 
         except Error as e:
             print(f"❌ Error while connecting or updating task {task_id} data: {e}")
+            return False
 
-        return task
+        return True
+
+    @classmethod
+    def destroy(cls, task_id):
+        return True

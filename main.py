@@ -1,9 +1,13 @@
 from controllers.TaskController import TaskController
 from helpers.ValidateText import ValidateText
+from helpers.ValidateStatus import ValidateStatus
+from helpers.ValidateId import ValidateId
 
 
 def menu():
     validator = ValidateText()
+    validator_status = ValidateStatus()
+    validate_id = ValidateId()
 
     while True:
         print("""
@@ -16,52 +20,76 @@ def menu():
 [6] Exit
         """)
 
-        task = input("Select Task: ")
+        task = input("👉 Select Task: ")
 
-        if task == "1":
-            name = validator.required_string("Add Name: ", "name").title()
-            TaskController.store({
-                "name": name,
-                "description": validator.required_string("Add Description: ", "description")
-            })
+        match task:
+            case 1 | "1":
+                name = validator.required_string("Add Name: ", "name").title()
+                TaskController.store({
+                    "name": name,
+                    "description": validator.required_string("Add Description: ", "description")
+                })
 
-            print("✅ Task Created: " + name)
+                print("✅ Task Created: " + name)
 
-        elif task == "2":
-            print("🔍 List Tasks")
-            keyword = input("Search: ")
-            response = TaskController.index(keyword)
+            case 2 | "2":
+                print("🔍 List Tasks")
+                keyword = input("Search: ")
+                response = TaskController.index(keyword)
 
-            for task in response:
-                print(str(task["id"]) + ". " + task["name"])
+                for task in response:
+                    print(f"🏷️ Task: {task['id']}. {task['name']}")
 
-        elif task == "3":
-            print("🚀 Task Detail")
-            task_id = input("ID: ")
-            task = TaskController.show(task_id)
-            print("🏷️ ID: " + str(task["id"]))
-            print("📌 Title: " + task["name"])
-            print("📊 Status: " + task["status"])
-            print("📋 Description: " + task["description"])
+            case 3 | "3":
+                print("🚀 Task Detail")
+                task = TaskController.show(int(input("ID: ")))
 
-        elif task == "4":
-            print("📝 Task Update")
-            task_id = input("ID: ")
-            task = TaskController.update(
-                    int(task_id),
-                    {
-                        "name": validator.required_string("New Name: ", "name"),
-                        "description": validator.required_string("New Description: ", "description"),
-                        "status": validator.required_string("New Status: ", "status")
-                    }
-                )
+                if task:
+                    print(f"🏷️ ID: {task['id']}")
+                    print(f"📌 Title: {task['name']}")
+                    print(f"📊 Status: {task['status']}")
+                    print(f"📋 Description: {task['description']}")
 
-        elif task == "6":
-            print("👋 Exiting...")
-            break
+                else:
+                    print("🐞 Task not fond")
 
-        else:
-            print("❌ Invalid option. Please choose 1, 2, 3, 4, 6.")
+            case 4 | "4":
+
+                while True:
+
+                    print("📝 Task Update")
+                    task_id = validate_id.exit("tasks", input("ID: "))
+                    name = validator.required_string("New Name: ", "name")
+                    description = validator.required_string("New Description: ", "description")
+                    status = validator_status.in_list(validator.required_string("New Status: ", "status"))
+
+                    if name is False or description is False or status is False:
+                        print("⚠️ Task update failed or task not found.")
+                        break
+
+                    else:
+                        TaskController\
+                            .update(
+                                int(task_id),
+                                {
+                                    "name": name,
+                                    "description": description,
+                                    "status": status
+                                }
+                            )
+
+                        print(f"✅ Task Updated: {task['id']}")
+
+            case 5 | "5":
+                task = TaskController.destroy(int(input("ID: ")))
+                print(task)
+
+            case 6 | "6":
+                print("👋 Exiting...")
+                break
+
+            case _:
+                print("❌ Invalid option. Please choose 1, 2, 3, 4, 5, 6.")
 
 
 # Run the menu
